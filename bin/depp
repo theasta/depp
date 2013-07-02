@@ -1,0 +1,75 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var basedir = process.cwd(); // basedir = dir where the cli is triggered
+
+var argv = require('optimist').argv;
+if (argv.version) {
+  var pkg = require('../package.json');
+  console.log('depp version: ' + pkg.version);
+  process.exit(0);
+}
+
+var displayDependencies = function(packageData, depKey){
+  var dep = packageData[depKey];
+  var indent = '    ';
+  var noDepMsg = indent + '∅';
+  console.log('- ' + depKey + ':');
+  if (typeof dep === 'object') {
+    var depValues = Object.keys(dep);
+    if (depValues.length === 0) {
+      console.log(noDepMsg);
+    } else {
+      depValues.forEach(function(v){
+        console.log(indent+v+': ' + dep[v]);
+      });
+    }
+  } else {
+      console.log(noDepMsg);
+  }
+};
+
+var getProjectDependencies=  function(packageFile){
+  var packageData = require(packageFile);
+  if (packageData) {
+    var name =  packageData.name || '[Untitled]';
+    if (packageData.version) name += '@' + packageData.version;
+    console.log('---------------------------');
+    console.log(name);
+    console.log(packageFile.replace('/package.json', ''));
+    console.log('---------------------------');
+
+    displayDependencies(packageData, 'dependencies');
+    if (argv.dev) {
+      displayDependencies(packageData, 'devDependencies');
+    }
+    console.log('');
+  }
+};
+
+var walk = require('walk');
+var walker = walk.walk(basedir, {
+  followLinks: false,
+  filters: ["Temp", "_Temp", "node_modules"]
+});
+
+var myarr = [];
+
+walker.on("file", function (root, fileStats, next) {
+  // if the filename is package.json and
+  // is not located in a node_modules folder,
+  // keep it
+  if ( fileStats.name.indexOf('package.json') !== -1 && root.indexOf('node_modules') === -1 ) {
+    myarr.push(root);
+  }
+  next();
+});
+
+walker.on("end", function () {
+  myarr.forEach(function(root) {
+    var filePath = root + '/package.json';
+    getProjectDependencies(filePath);
+  });
+});
+

@@ -1,0 +1,23 @@
+{
+  "name": "depp",
+  "version": "0.0.1",
+  "description": "Dependency Parser",
+  "author": {
+    "name": "Alexandrine Boissière",
+    "email": "theasta@gmail.com"
+  },
+  "bin": "./bin/depp",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/theasta/depp.git"
+  },
+  "license": "BSD",
+  "dependencies": {
+    "walk": "~2.2.1",
+    "optimist": "~0.6.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.6.0"
+  }
+}
